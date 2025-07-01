@@ -1,0 +1,4 @@
+[role="menuitem"][data-command="filemenu:logout"],
+[role="menuitem"][data-command="filemenu:shutdown"] {
+  display: none;
+}

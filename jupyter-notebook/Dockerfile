@@ -1,25 +1,22 @@
 ARG PYTHON_BASE=3.12-alpine
-
 FROM python:${PYTHON_BASE}
-
-ARG CUSTOM_USER=abcdef
-ARG _APK_PACKAGES="gcc musl-dev linux-headers"
-ARG _PIP_PACKAGES="ipykernel terminado debugpy"
 ARG JUPYTER_VERSION=7.4.2
+ARG CUSTOM_USER=jupyter
 
 WORKDIR /
 
-RUN apk add --no-cache ${_APK_PACKAGES} && \
-	pip install --no-cache-dir notebook==${JUPYTER_VERSION} && \
+RUN apk add --no-cache gcc musl-dev linux-headers && \
+	pip install --no-cache notebook==${JUPYTER_VERSION} && \
 	jupyter server extension disable jupyter_server_terminals && \
-	pip uninstall -y ${_PIP_PACKAGES} && \
-	apk del ${_APK_PACKAGES} && \
-	rm -rf /root/.cache && \
-	(find / -name __pycache__ | xargs rm -rf)
-
-# HACK: I want custom.css to load when editing a notebook.
-RUN sed -i 's/<head>/<head><link rel="stylesheet" type="text\/css" href="{{ base_url | escape }}custom\/custom.css"\/>/' \
-	/usr/local/lib/python${PYTHON_VERSION%.*}/site-packages/notebook/templates/edit.html
+	wget https://raw.githubusercontent.com/imba-tjd/pip-autoremove/1c631f0a723517e10d9244102806aef33a9d9db2/pip_autoremove.py -O ./pip_autoremove.py && \
+	python3 pip_autoremove.py -y ipykernel terminado debugpy setuptools && \
+	pip uninstall -y pip && \
+	apk del gcc musl-dev linux-headers && \
+	rm -rf /var/cache /root/.cache ./pip_autoremove.py && \
+	(find / -name __pycache__ | xargs rm -rf) && \
+	# HACK: I want custom.css to load when editing a notebook.
+	sed -i 's/<head>/<head><link rel="stylesheet" type="text\/css" href="{{ base_url | escape }}custom\/custom.css"\/>/' \
+		/usr/local/lib/python${PYTHON_VERSION%.*}/site-packages/notebook/templates/edit.html
 
 RUN adduser --disabled-password --gecos "" ${CUSTOM_USER}
 
@@ -27,7 +24,7 @@ USER ${CUSTOM_USER}
 
 WORKDIR /home/${CUSTOM_USER}
 
-# Must be created by the cutom user instead of root.
+# Must be created by the custom user instead of root.
 RUN mkdir .jupyter
 
 COPY custom.css .jupyter/custom/custom.css

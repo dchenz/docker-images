@@ -28,5 +28,6 @@ WORKDIR /home/${CUSTOM_USER}
 RUN mkdir .jupyter
 
 COPY custom.css .jupyter/custom/custom.css
+COPY jupyter_notebook_config.py .jupyter/jupyter_notebook_config.py
 
 CMD ["jupyter", "notebook"]

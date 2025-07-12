@@ -6,7 +6,7 @@ ARG CUSTOM_USER=jupyter
 WORKDIR /
 
 RUN apk add --no-cache gcc musl-dev linux-headers && \
-	pip install --no-cache notebook==${JUPYTER_VERSION} && \
+	pip install --no-cache notebook==${JUPYTER_VERSION} jupyterlab-spreadsheet-editor==0.7.2 && \
 	jupyter server extension disable jupyter_server_terminals && \
 	wget https://raw.githubusercontent.com/imba-tjd/pip-autoremove/1c631f0a723517e10d9244102806aef33a9d9db2/pip_autoremove.py -O ./pip_autoremove.py && \
 	python3 pip_autoremove.py -y ipykernel terminado debugpy setuptools && \

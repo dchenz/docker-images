@@ -13,10 +13,10 @@ RUN apk add --no-cache gcc musl-dev linux-headers && \
 	pip uninstall -y pip && \
 	apk del gcc musl-dev linux-headers && \
 	rm -rf /var/cache /root/.cache ./pip_autoremove.py && \
-	(find / -name __pycache__ | xargs rm -rf) && \
-	# HACK: I want custom.css to load when editing a notebook.
-	sed -i 's/<head>/<head><link rel="stylesheet" type="text\/css" href="{{ base_url | escape }}custom\/custom.css"\/>/' \
-		/usr/local/lib/python${PYTHON_VERSION%.*}/site-packages/notebook/templates/edit.html
+	(find / -name __pycache__ | xargs rm -rf)
+
+RUN sed -i 's/<head>/<head><link rel="stylesheet" type="text\/css" href="{{ base_url | escape }}custom\/custom.css"\/>/' \
+	/usr/local/lib/python${PYTHON_VERSION%.*}/site-packages/notebook/templates/edit.html
 
 RUN adduser --disabled-password --gecos "" ${CUSTOM_USER}
 

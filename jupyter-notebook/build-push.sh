@@ -8,7 +8,9 @@ COMMIT_HASH=$(git rev-parse --short HEAD)
 
 IMAGE_NAME=dchenz/jupyter-notebook:$PYTHON_BASE-$JUPYTER_VERSION-$COMMIT_HASH
 
-docker build . -t $IMAGE_NAME \
+docker build src \
+    -f ./Dockerfile \
+    -t $IMAGE_NAME \
     --build-arg PYTHON_BASE=$PYTHON_BASE \
     --build-arg JUPYTER_VERSION=$JUPYTER_VERSION
 

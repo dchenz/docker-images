@@ -18,6 +18,11 @@ RUN apk add --no-cache gcc musl-dev linux-headers && \
 RUN sed -i 's/<head>/<head><link rel="stylesheet" type="text\/css" href="{{ base_url | escape }}custom\/custom.css"\/>/' \
 	/usr/local/lib/python${PYTHON_VERSION%.*}/site-packages/notebook/templates/edit.html
 
+RUN for jsFile in /usr/local/share/jupyter/labextensions/spreadsheet-editor/static/*.js; do \
+		sed -i 's/this.fitMode="all-equal-default",e.localPath.endsWith/this.fitMode="all-equal-fit",e.localPath.endsWith/g' $jsFile; \
+		sed -i 's/(this.fitMode="fit-cells",this.relayout())/(this.fitMode="all-equal-fit",this.relayout())/g' $jsFile; \
+	done
+
 RUN adduser --disabled-password --gecos "" ${CUSTOM_USER}
 
 USER ${CUSTOM_USER}

@@ -4,7 +4,7 @@ FROM python:${PYTHON_BASE} AS jse_builder
 
 RUN apk add gcc git musl-dev linux-headers nodejs
 
-RUN pip install --break-system-packages git+https://github.com/dchenz/jupyterlab-spreadsheet-editor.git && \
+RUN pip install --break-system-packages git+https://github.com/dchenz/jupyterlab-spreadsheet-editor.git@0ea1aba2cd8b2d672ace220b27395855af12bb8b && \
 	(find / -name __pycache__ | xargs rm -rf)
 
 FROM python:${PYTHON_BASE}

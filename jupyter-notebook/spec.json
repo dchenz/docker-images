@@ -1,0 +1,8 @@
+{
+  "build_args": {
+    "PYTHON_BASE": "3.12-alpine",
+    "JUPYTER_VERSION": "7.4.2"
+  },
+  "repository": "dchenz/jupyter-notebook",
+  "context": "src"
+}

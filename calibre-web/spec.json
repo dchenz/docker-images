@@ -1,0 +1,6 @@
+{
+  "build_args": {
+    "CALIBRE_VERSION": "0.6.24"
+  },
+  "repository": "dchenz/calibre-web"
+}

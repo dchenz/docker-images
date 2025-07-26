@@ -1,4 +1,6 @@
-FROM golang:1.21.7-alpine3.19 AS builder
+ARG GOLANG_BASE_IMAGE
+
+FROM golang:${GOLANG_BASE_IMAGE} AS builder
 
 WORKDIR /app
 

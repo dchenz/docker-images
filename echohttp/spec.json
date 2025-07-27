@@ -2,5 +2,6 @@
   "build_args": {
     "GOLANG_BASE_IMAGE": "1.21.7-alpine"
   },
-  "repository": "dchenz/echohttp"
+  "repository": "dchenz/echohttp",
+  "context": "src"
 }

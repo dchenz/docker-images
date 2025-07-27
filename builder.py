@@ -5,6 +5,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 
 
 def getArgs() -> argparse.Namespace:
@@ -68,27 +69,44 @@ def getDockerImageName(spec: dict) -> str:
     return f"{spec['repository']}:{gitHash}"
 
 
-def runDockerBuild(spec: dict) -> None:
-    context = spec.get("context", ".")
-    dockerfile = spec.get("dockerfile", "./Dockerfile")
+def runDockerBuild(spec: dict) -> str:
     imageName = getDockerImageName(spec)
-    command = [
-        "docker",
-        "build",
-        context,
-        "-f",
-        dockerfile,
-        "-t",
-        imageName,
-    ]
-    for name, value in spec.get("build_args", {}).items():
-        command.append("--build-arg")
-        command.append(f"{name}={value}")
-    runCommand(command)
+
+    def _build() -> None:
+        context = spec.get("context", ".")
+        dockerfile = spec.get("dockerfile", "./Dockerfile")
+        command = [
+            "docker",
+            "build",
+            context,
+            "-f",
+            dockerfile,
+            "-t",
+            imageName,
+        ]
+        for name, value in spec.get("build_args", {}).items():
+            command.append("--build-arg")
+            command.append(f"{name}={value}")
+        runCommand(command)
+
+    gitRepository = spec.get("git_checkout_repository")
+    gitRepositoryCommit = spec.get("git_checkout_commit")
+
+    if gitRepository and gitRepositoryCommit:
+        workDir = os.getcwd()
+        with tempfile.TemporaryDirectory() as tempDir:
+            runCommand(["git", "clone", gitRepository, tempDir])
+            os.chdir(tempDir)
+            runCommand(["git", "checkout", gitRepositoryCommit])
+            _build()
+        os.chdir(workDir)
+    else:
+        _build()
+
+    return imageName
 
 
-def runDockerPush(spec: dict) -> None:
-    imageName = getDockerImageName(spec)
+def runDockerPush(imageName: str) -> None:
     input(f"Press any key to push {imageName}...")
     runCommand(["docker", "push", imageName])
 
@@ -97,7 +115,7 @@ if __name__ == "__main__":
     args = getArgs()
     os.chdir(args.project_dir)
     with open("spec.json") as f:
-        spec = json.load(f)
-    runDockerBuild(spec)
+        spec: dict = json.load(f)
+    imageName = runDockerBuild(spec)
     if args.push:
-        runDockerPush(spec)
+        runDockerPush(imageName)

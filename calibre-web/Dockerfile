@@ -9,7 +9,7 @@ ARG CALIBRE_VERSION
 RUN apt-get update && \
     apt-get install -y --no-install-recommends build-essential python3-pip && \
     apt-get install -y --no-install-recommends imagemagick ghostscript libmagic1t64 libxi6 libxslt1.1 python3-venv sqlite3 xdg-utils && \
-    curl -o /tmp/calibre-web.tar.gz -L https://github.com/janeczku/calibre-web/archive/${CALIBRE_VERSION}.tar.gz && \
+    curl -o /tmp/calibre-web.tar.gz -L https://github.com/dchenz/calibre-web/archive/${CALIBRE_VERSION}.tar.gz && \
     mkdir -p /app/calibre-web && \
     tar xf /tmp/calibre-web.tar.gz -C /app/calibre-web --strip-components=1 && \
     cd /app/calibre-web && \

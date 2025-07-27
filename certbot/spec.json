@@ -1,0 +1,6 @@
+{
+  "build_args": {
+    "CERTBOT_VERSION": "3.3.0"
+  },
+  "repository": "dchenz/certbot"
+}

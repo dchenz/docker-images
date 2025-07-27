@@ -1,7 +1,10 @@
 import argparse
+import fcntl
+import io
 import json
 import os
 import subprocess
+import sys
 
 
 def getArgs() -> argparse.Namespace:
@@ -11,24 +14,57 @@ def getArgs() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def setNonBlocking(fd: int) -> None:
+    flags = fcntl.fcntl(fd, fcntl.F_GETFL)
+    fcntl.fcntl(fd, fcntl.F_SETFL, flags | os.O_NONBLOCK)
+
+
 def runCommand(command: list[str]) -> str:
-    result = subprocess.run(command, capture_output=True, text=True)
-    stdout = (result.stdout or "").strip()
-    stderr = (result.stderr or "").strip()
-    if stdout:
-        print("STDOUT:", stdout)
-    if stderr:
-        print("STDERR:", stderr)
-    if result.returncode:
-        raise Exception(f"Docker build failed with {result.returncode}")
-    return stdout
+    stdoutText = io.StringIO()
+
+    with subprocess.Popen(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        bufsize=1,
+        universal_newlines=True,
+    ) as process:
+        stdout = process.stdout
+        stderr = process.stderr
+        assert stdout
+        assert stderr
+        setNonBlocking(stdout.fileno())
+        setNonBlocking(stderr.fileno())
+
+        try:
+            while True:
+                c1 = stdout.read(1)
+                if c1:
+                    sys.stdout.write(c1)
+                    stdoutText.write(c1)
+
+                c2 = stderr.read(1)
+                if c2:
+                    sys.stderr.write(c2)
+                    stdoutText.write(c2)
+
+                if process.poll() is not None and not (c1 or c2):
+                    break
+
+            if process.returncode != 0:
+                raise subprocess.CalledProcessError(process.returncode, command)
+
+        except KeyboardInterrupt:
+            pass
+
+    return stdoutText.getvalue()
 
 
 def getDockerImageName(spec: dict) -> str:
     repository = spec.get("repository")
     if not repository:
         raise Exception("Missing repository")
-    gitHash = runCommand(["git", "rev-parse", "--short", "HEAD"])
+    gitHash = runCommand(["git", "rev-parse", "--short", "HEAD"]).strip()
     return f"{spec['repository']}:{gitHash}"
 
 

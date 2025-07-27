@@ -1,6 +1,6 @@
 {
   "build_args": {
-    "CALIBRE_VERSION": "4fe28028ea56e2cc784776a1126c6d836c797855"
+    "CALIBRE_VERSION": "b77de98cde752c0dad0f64f0b3bc341b23f3e22e"
   },
   "repository": "dchenz/calibre-web"
 }
